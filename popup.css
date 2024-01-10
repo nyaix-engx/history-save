@@ -1,0 +1,200 @@
+.container {
+  border-radius: 10px;
+  width: 275px;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  row-gap: 10px;
+}
+
+.control-buttons {
+  justify-content: center;
+  display: flex;
+  width: 58%;
+  align-self: center;
+}
+
+.play-button {
+  width: 25px;
+  height: 25px;
+  background-color: #3498db; /* Blue color, you can change it to your preferred color */
+  border: none;
+  border-radius: 50%;
+  position: relative;
+  cursor: pointer;
+}
+
+.play-button::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-40%, -50%);
+  border-style: solid;
+  border-width: 6px 0 6px 10px;
+  border-color: transparent transparent transparent white; /* White color, you can change it to your preferred color */
+}
+
+.pause-button {
+  width: 25px;
+  height: 25px;
+  background-color: #e74c3c; /* Red color, you can change it to your preferred color */
+  border: none;
+  border-radius: 50%;
+  position: relative;
+  cursor: pointer;
+}
+
+.pause-button::before,
+.pause-button::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white; /* White color, you can change it to your preferred color */
+  width: 5px;
+  height: 15px;
+  border-radius: 1px;
+}
+
+.pause-button::before {
+  margin-left: -4px;
+}
+
+.pause-button::after {
+  margin-left: 4px;
+}
+
+.stop-button {
+  width: 25px;
+  height: 25px;
+  background-color: #e74c3c; /* Red color, you can change it to your preferred color */
+  border: none;
+  border-radius: 50%;
+  position: relative;
+  cursor: pointer;
+}
+
+.stop-button::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white; /* White color, you can change it to your preferred color */
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.submit-button {
+  background-color: #4caf50; /* Green color, you can change it to your preferred color */
+  color: #fff; /* White text color */
+  padding: 8px 12px; /* Adjust padding as needed */
+  border: none;
+  border-radius: 5px; /* Rounded corners */
+  cursor: pointer;
+  font-size: 14px;
+  width: fit-content;
+}
+
+/* Hover effect for the submit button */
+.submit-button:hover {
+  background-color: #45a049; /* Darker green color on hover */
+}
+
+.submit-button-wrapper {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  row-gap: 10px;
+  align-items: center;
+}
+
+.submit-title {
+  font-size: 12px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.heading-text {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 11px 0px;
+  color: #c65353;
+}
+
+.save-history-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  column-gap: 10px;
+  row-gap: 10px;
+}
+
+.save-history-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: #53ad97;
+}
+
+ul {
+  list-style-type: none; /* Remove default list styles (bullets) */
+  padding: 0;
+  margin: 0;
+}
+
+.history-list {
+  padding: 5px;
+  border: 1px solid rgb(218, 171, 171);
+  height: 150px;
+  overflow: auto;
+}
+
+.history-items {
+  list-style-type: none; /* Remove default list styles (bullets) */
+  padding: 0;
+  margin: 0;
+}
+
+.item {
+  display: flex;
+  background-color: #f8f8f8;
+  border-bottom: 1px solid rgb(212, 212, 212);
+  justify-content: space-between;
+  padding: 5px;
+}
+
+.item a {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.close-button {
+  background-color: #e74c3c; /* Red color, you can change it to your preferred color */
+  color: #fff; /* White text color */
+  border: none;
+  padding: 3px 10px; /* Adjust padding as needed */
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 50%; /* Create a circular button */
+}
+
+.close-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Hover effect for the cross button */
+.close-button:hover {
+  background-color: #c0392b; /* Darker red color on hover */
+}
+
+.close-icon {
+  width: 15px;
+  height: 15px;
+}
