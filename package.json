@@ -5,16 +5,19 @@
   "description": "A basic Plasmo extension.",
   "author": "Plasmo Corp. <foss@plasmo.com>",
   "scripts": {
-    "dev": "plasmo dev",
+    "dev": "plasmo dev --verbose",
     "build": "plasmo build",
     "test": "plasmo test"
   },
   "dependencies": {
+    "@auth0/auth0-react": "^2.2.4",
     "@plasmohq/storage": "^1.9.0",
+    "auth0": "^4.3.1",
     "moment": "^2.30.1",
     "plasmo": "0.84.0",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "tesseract.js": "^2.1.5"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "4.1.1",
@@ -27,11 +30,17 @@
   },
   "manifest": {
     "host_permissions": [
-      "https://*/*"
+      "<all_urls>"
     ],
     "permissions": [
       "history",
-      "storage"
-    ]
+      "storage",
+      "input",
+      "tabs",
+      "activeTab"
+    ],
+    "background": {
+      "service_worker": "background.ts"
+    }
   }
 }

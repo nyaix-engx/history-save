@@ -99,6 +99,17 @@
   width: fit-content;
 }
 
+.submit-form {
+  background-color: #4caf50; /* Green color, you can change it to your preferred color */
+  color: #fff; /* White text color */
+  padding: 8px 12px; /* Adjust padding as needed */
+  border: none;
+  border-radius: 5px; /* Rounded corners */
+  cursor: pointer;
+  font-size: 14px;
+  width: fit-content;
+}
+
 /* Hover effect for the submit button */
 .submit-button:hover {
   background-color: #45a049; /* Darker green color on hover */
@@ -197,4 +208,14 @@ ul {
 .close-icon {
   width: 15px;
   height: 15px;
+}
+
+.inputText {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
 }
