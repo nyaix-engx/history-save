@@ -37,7 +37,8 @@
       "storage",
       "input",
       "tabs",
-      "activeTab"
+      "activeTab",
+      "scripting"
     ],
     "background": {
       "service_worker": "background.ts"

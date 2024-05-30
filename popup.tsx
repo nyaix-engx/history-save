@@ -24,14 +24,49 @@ function Some() {
   const [isStopClicked, setIsStopClicked] = useStorage("stopClicked", false)
   const [showHistory, setShowHistory] = useStorage("showHistory", false)
   const [keystrokes, setKeystrokes] = useState<Keystroke[]>([])
+  const [currentTab, setCurrentTab] = useState(null)
 
-  // console.log("Key", keystrokes)
-
+  // console.log("history", history)
+  // console.log("Current tab", currentTab)
+  console.log("Keystrokes", keystrokes)
   useEffect(() => {
     // Load keystrokes from local storage when the popup opens
+
     chrome.storage.local.get({ keystrokes: [] }, (result) => {
-      setKeystrokes(result.keystrokes)
+      // console.log("IsActive", isActive)
+      if (isActive === "pause") setKeystrokes(result.keystrokes)
     })
+  }, [isActive])
+
+  const sendMessage = (status) => {
+    chrome.runtime.sendMessage({
+      action: "sendMessageToContentScript",
+      status
+    })
+  }
+
+  useEffect(() => {
+    // Fetch the current tab initially
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const tab = tabs[0]
+      if (tab) {
+        setCurrentTab(tab)
+      }
+    })
+
+    // Listen for messages from the background script
+    const handleMessage = (message) => {
+      if (message.tab) {
+        setCurrentTab(message.tab)
+      }
+    }
+
+    chrome.runtime.onMessage.addListener(handleMessage)
+
+    // Cleanup the listener on unmount
+    return () => {
+      chrome.runtime.onMessage.removeListener(handleMessage)
+    }
   }, [])
 
   const mergeHistory = () =>
@@ -49,6 +84,7 @@ function Some() {
 
   const handlePlay = () => {
     setIsActive("pause")
+    sendMessage("play")
     setIsStopClicked(false)
     setShowHistory(false)
     setTimeInterval(
@@ -56,19 +92,9 @@ function Some() {
     )
   }
 
-  const getCurrentTab = async () => {
-    let queryOptions = { active: true, lastFocusedWindow: true }
-    // `tab` will either be a `tabs.Tab` instance or `undefined`.
-    let [tab] = await chrome.tabs.query(queryOptions)
-    return tab
-  }
-
-  // console.log({ history })
-  // console.log({ timeInterval })
-  // console.log({ urlInputMap })
-
   const handlePause = () => {
     setIsActive("play")
+    sendMessage("pause")
     setIsStopClicked(true)
     setShowHistory(false)
     if (timeInterval.length > 0) {
@@ -99,45 +125,11 @@ function Some() {
           startTime: x,
           endTime: y
         },
-        // if (
-        //     (Object.entries(historyItems).length === 0 &&
-        //       typeof data === "object") ||
-        //     Object.entries(data).length > 0
-        //   ) {
-        //     let temp = []
-        //     console.log("__>", data)
-        //     if (data.length > 0) {
-        //       for (const [key, value] of Object.entries(data)) {
-        //         temp.push(value)
-        //       }
-        //       console.log("temp", temp)
-        //       return [...temp, ...historyItems]
-        //     } else {
-        //       getCurrentTab()
-        //         .then((data) => {
-        //           console.log("tabinfo", data)
-        //           const temp = []
-        //           const obj = {
-        //             url: data.url,
-        //             id: data.id,
-        //             lastVisitTime: data.lastAccessed,
-        //             visitCount: "",
-        //             typedCount: "",
-        //             title: data.title
-        //           }
-        //           temp.push(obj)
-        //           return [...temp, ...historyItems]
-        //         })
-        //         .catch((err) => console.log(err))
-        //     }
-        //   } else {
-        //     console.log("here")
-        //     return [...historyItems]
-        //   }
+
         function (historyItems) {
           setHistory((data) => {
-            console.log({ data })
-            console.log({ historyItems })
+            // console.log({ data })
+            // console.log({ historyItems })
             if (
               Object.entries(historyItems).length > 0 &&
               Object.entries(data).length == 0
@@ -154,23 +146,18 @@ function Some() {
               }
               return [...temp, ...historyItems]
             } else if (Object.entries(historyItems).length === 0) {
-              getCurrentTab()
-                .then((data) => {
-                  // console.log("tabinfo", data)
-                  const temp = []
-                  const obj = {
-                    url: data.url,
-                    id: data.id,
-                    lastVisitTime: data.lastAccessed,
-                    visitCount: "",
-                    typedCount: "",
-                    title: data.title
-                  }
-                  console.log("Obj", obj)
-                  temp.push(obj)
-                  return [...temp, ...historyItems]
-                })
-                .catch((err) => console.log(err))
+              const temp = []
+              const obj = {
+                url: currentTab?.url,
+                id: currentTab?.id,
+                lastVisitTime: currentTab?.lastAccessed,
+                visitCount: "",
+                typedCount: "",
+                title: currentTab?.title
+              }
+              // console.log("Obj", obj)
+              temp.push(obj)
+              return [...temp, ...historyItems]
             }
           })
         }
@@ -182,6 +169,7 @@ function Some() {
 
   const handleSubmit = () => {
     // console.log("Submit")
+    setKeystrokes([])
     const newHistory = mergeHistory()
     const dataStr =
       "data:text/json;charset=utf-8," +
