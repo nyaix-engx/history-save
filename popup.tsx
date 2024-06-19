@@ -25,9 +25,11 @@ function Some() {
   const [showHistory, setShowHistory] = useStorage("showHistory", false)
   const [keystrokes, setKeystrokes] = useState<Keystroke[]>([])
   const [currentTab, setCurrentTab] = useState(null)
+  const [isRecording, setIsRecording] = useState<boolean>(false)
 
-  // console.log("history", history)
+  console.log("history", history)
   // console.log("Current tab", currentTab)
+  console.log("Initial Recording", isRecording)
   console.log("Keystrokes", keystrokes)
   useEffect(() => {
     // Load keystrokes from local storage when the popup opens
@@ -38,12 +40,49 @@ function Some() {
     })
   }, [isActive])
 
-  const sendMessage = (status) => {
+  useEffect(() => {
+    // Get the initial recording status from storage
+    chrome.storage.local.get(["isRecording"], (result) => {
+      if (result.isRecording !== undefined) {
+        setIsRecording(result.isRecording)
+      }
+    })
+  }, [])
+  // useEffect(() => {
+  //   // Retrieve keystrokes from Chrome storage
+  //   chrome.storage.local.get({ keystrokes: [] }, (result) => {
+  //     setKeystrokes(result.keystrokes);
+  //   });
+  // }, []);
+
+  const sendMessage = (message) => {
     chrome.runtime.sendMessage({
       action: "sendMessageToContentScript",
-      status
+      message
     })
   }
+
+  const toggleRecording = () => {
+    const newStatus = !isRecording
+
+    setIsRecording(newStatus)
+    // Set the new recording status in storage
+    chrome.storage.local.set({ isRecording: newStatus }, () => {
+      console.log("Recording status set to", newStatus)
+    })
+    // Optionally send a message to the content script to notify about the change
+    chrome.runtime.sendMessage({
+      action: "sendMessageToContentScript",
+      status: newStatus ? "play" : "pause"
+    })
+  }
+
+  // const sendMessage = (status) => {
+  //   chrome.runtime.sendMessage({
+  //     action: "sendMessageToContentScript",
+  //     status
+  //   })
+  // }
 
   useEffect(() => {
     // Fetch the current tab initially
@@ -84,7 +123,8 @@ function Some() {
 
   const handlePlay = () => {
     setIsActive("pause")
-    sendMessage("play")
+    // sendMessage("play")
+    toggleRecording()
     setIsStopClicked(false)
     setShowHistory(false)
     setTimeInterval(
@@ -94,7 +134,9 @@ function Some() {
 
   const handlePause = () => {
     setIsActive("play")
-    sendMessage("pause")
+    // sendMessage("pause")
+    toggleRecording()
+
     setIsStopClicked(true)
     setShowHistory(false)
     if (timeInterval.length > 0) {
@@ -112,63 +154,10 @@ function Some() {
   const handleStop = () => {
     setIsStopClicked(false)
     setShowHistory(true)
-    // setIsPaused(true)
-    // console.log("showCount", timeInterval)
-    for (let i = 0; i < timeInterval.length; i++) {
-      let x = Math.floor(new Date(timeInterval[i].startTime).getTime())
-      let y = Math.floor(new Date(timeInterval[i].endTime).getTime())
-      // console.log({ x })
-      // console.log({ y })
-      chrome.history.search(
-        {
-          text: "",
-          startTime: x,
-          endTime: y
-        },
-
-        function (historyItems) {
-          setHistory((data) => {
-            // console.log({ data })
-            // console.log({ historyItems })
-            if (
-              Object.entries(historyItems).length > 0 &&
-              Object.entries(data).length == 0
-            ) {
-              return [...historyItems]
-            } else if (
-              Object.entries(historyItems).length > 0 &&
-              Object.entries(data).length > 0
-            ) {
-              let temp = []
-              // console.log("here")
-              for (const [key, value] of Object.entries(data)) {
-                temp.push(value)
-              }
-              return [...temp, ...historyItems]
-            } else if (Object.entries(historyItems).length === 0) {
-              const temp = []
-              const obj = {
-                url: currentTab?.url,
-                id: currentTab?.id,
-                lastVisitTime: currentTab?.lastAccessed,
-                visitCount: "",
-                typedCount: "",
-                title: currentTab?.title
-              }
-              // console.log("Obj", obj)
-              temp.push(obj)
-              return [...temp, ...historyItems]
-            }
-          })
-        }
-      )
-
-      setTimeInterval([])
-    }
+    setHistory((prevData) => [...prevData, ...keystrokes])
   }
 
   const handleSubmit = () => {
-    // console.log("Submit")
     setKeystrokes([])
     const newHistory = mergeHistory()
     const dataStr =
@@ -180,7 +169,6 @@ function Some() {
     document.body.appendChild(dlAnchorElem) // required for firefox
     dlAnchorElem.click()
     dlAnchorElem.remove()
-    setHistory(newHistory)
     setHistory([])
     chrome.storage.local.clear(function () {
       console.log("Local storage cleared successfully.")
